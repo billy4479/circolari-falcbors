@@ -7,13 +7,13 @@ import (
 )
 
 type circolare struct {
-	Title string `json:"Title"`
+	Title string `json:"title"`
 	PDFs  []pdf  `json:"PDFs"`
 }
 
 type pdf struct {
-	Url   string `json:"URL"`
-	Title string `json:"Title"`
+	URL   string `json:"url"`
+	Title string `json:"title"`
 }
 
 const mainURL = "https://www.liceofalcbors.edu.it/archivio-circolari/"
@@ -38,13 +38,13 @@ func scrap() ([]circolare, error) {
 			href, _ := s.Attr("href")
 			title := s.Text()
 
+			fmt.Printf("Downloading \"%s\"...", title)
+
 			circular, err := goquery.NewDocument(href)
 			if err != nil {
 				errors = err
 				return
 			}
-
-			fmt.Printf("Downloading \"%s\"...", title)
 
 			var pdfs []pdf
 			circular.Find("section > div.pf-content > p > a").
@@ -52,7 +52,7 @@ func scrap() ([]circolare, error) {
 					href, _ := s.Attr("href")
 					pdfs = append(pdfs, pdf{
 						Title: s.Text(),
-						Url:   href,
+						URL:   href,
 					})
 				})
 			fmt.Println("\tDone.")

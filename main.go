@@ -1,24 +1,36 @@
 package main
 
 import (
-	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
-	"time"
+	"os"
 )
 
 func main() {
-	old, err := scrap()
-	if err != nil {
-		log.Fatal(err)
+
+	mode := flag.Int("mode", -1, "1 = fetch; 2 = fetch and diff with last fetch")
+	flag.Parse()
+
+	if *mode == 1 {
+		err := fetch()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return
 	}
-	time.Sleep(1 * time.Hour)
-	new, err := scrap()
-	if err != nil {
-		log.Fatal(err)
+	if *mode == 2 {
+		err := fetchAndDiff()
+		if err != nil {
+			if _, ok := err.(*os.PathError); ok {
+				log.Fatal("First run with mode 1")
+			}
+			log.Fatal(err)
+		}
 	}
 
-	d := getDiff(new, old)
-	j, _ := json.Marshal(d)
-	fmt.Println(string(j))
+	if *mode == -1 {
+		fmt.Println("You must specify a -mode")
+	}
+	return
 }
